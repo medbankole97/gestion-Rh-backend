@@ -1,135 +1,79 @@
-// validators/UserValidator.js
-import { check, param, validationResult } from 'express-validator';
-import { StatusCodes } from 'http-status-codes';
+import { body, param, validationResult } from 'express-validator';
 import prisma from '../config/prisma.js';
 
-// Validator for adding a user
-const addUserValidator = [
-  check('fullname')
+// Règles de validation pour l'ajout d'un utilisateur
+export const addUserValidator = [
+  body('fullname')
+    .isString()
     .notEmpty()
-    .withMessage('Fullname cannot be empty!')
+    .withMessage('Full name is required.')
     .bail()
     .isLength({ min: 3 })
-    .withMessage('Fullname must be at least 3 characters long!'),
+    .withMessage('Full name must be at least 3 characters long.'),
 
-  check('email')
-    .notEmpty()
-    .withMessage('Email cannot be empty!')
-    .bail()
+  body('email')
     .isEmail()
-    .withMessage('Invalid email format!'),
-
-  check('password')
-    .notEmpty()
-    .withMessage('Password cannot be empty!')
-    .bail()
-    .isLength({ min: 6 })
-    .withMessage('Password must be at least 6 characters long!'),
-
-  check('role')
-    .optional()
-    .isIn(['admin', 'user'])
-    .withMessage('Role must be either "admin" or "user"!'),
-
-  check('status')
-    .optional()
-    .isIn(['active', 'inactive'])
-    .withMessage('Status must be either "active" or "inactive"!'),
-
-  check('employeeId')
-    .optional()
-    .isNumeric()
-    .withMessage('Employee ID must be a number!'),
-
-  (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res
-        .status(StatusCodes.UNPROCESSABLE_ENTITY)
-        .json({ errors: errors.array() });
-    }
-    next();
-  },
-];
-
-// Validator for updating a user
-const updateUserValidator = [
-  param('id')
-    .notEmpty()
-    .withMessage('User ID is required!')
+    .withMessage('Invalid email format.')
     .bail()
     .custom(async (value) => {
-      const result = await prisma.user.findUnique({ where: { id: parseInt(value) } });
-      if (!result) {
-        throw new Error('User does not exist!');
+      const existingUser = await prisma.user.findUnique({
+        where: { email: value },
+      });
+      if (existingUser) {
+        throw new Error('Email already exists.');
       }
       return true;
     }),
 
-  check('fullname')
-    .optional()
-    .isLength({ min: 3 })
-    .withMessage('Fullname must be at least 3 characters long!'),
-
-  check('email')
-    .optional()
-    .isEmail()
-    .withMessage('Invalid email format!'),
-
-  check('password')
-    .optional()
+  body('password')
     .isLength({ min: 6 })
-    .withMessage('Password must be at least 6 characters long!'),
+    .withMessage('Password must be at least 6 characters long.'),
 
-  check('role')
-    .optional()
-    .isIn(['admin', 'user'])
-    .withMessage('Role must be either "admin" or "user"!'),
-
-  check('status')
-    .optional()
-    .isIn(['active', 'inactive'])
-    .withMessage('Status must be either "active" or "inactive"!'),
-
-  check('employeeId')
-    .optional()
-    .isNumeric()
-    .withMessage('Employee ID must be a number!'),
+  body('role').isString().notEmpty().withMessage('Role is required.'),
 
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res
-        .status(StatusCodes.UNPROCESSABLE_ENTITY)
-        .json({ errors: errors.array() });
+      return res.status(400).json({ errors: errors.array() });
     }
     next();
   },
 ];
 
-// Validator for deleting a user
-const deleteUserValidator = [
-  param('id')
-    .notEmpty()
-    .withMessage('User ID is required!')
-    .bail()
-    .custom(async (value) => {
-      const result = await prisma.user.findUnique({ where: { id: parseInt(value) } });
-      if (!result) {
-        throw new Error('User does not exist!');
-      }
-      return true;
-    }),
+// Règles de validation pour la mise à jour d'un utilisateur
+export const updateUserValidator = [
+  body('fullname')
+    .optional()
+    .isString()
+    .isLength({ min: 3 })
+    .withMessage('Full name must be at least 3 characters long.'),
 
   (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res
-        .status(StatusCodes.UNPROCESSABLE_ENTITY)
-        .json({ errors: errors.array() });
+      return res.status(400).json({ errors: errors.array() });
     }
     next();
   },
 ];
 
-export { addUserValidator, updateUserValidator, deleteUserValidator };
+// export const deleteUserValidator = [
+//   body('id').isInt().withMessage('Valid ID is required'),
+//   (req, res, next) => {
+//     const errors = validationResult(req);
+//     if (!errors.isEmpty()) {
+//       return res.status(400).json({ errors: errors.array() });
+//     }
+//     next();
+//   },
+// ];
+export const deleteUserValidator = [
+  param('id').isInt().withMessage('Valid ID is required in the URL parameter.'),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    next();
+  },
+];

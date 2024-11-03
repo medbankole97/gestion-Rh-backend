@@ -31,24 +31,27 @@ const addRequestLeaveValidator = [
     .isInt()
     .withMessage('Type leave ID must be an integer!')
     .custom(async (value) => {
-      const typeLeave = await prisma.typeLeave.findUnique({ where: { id: value } });
+      const typeLeave = await prisma.typeLeave.findUnique({
+        where: { id: value },
+      });
       if (!typeLeave) {
         throw new Error('Type leave does not exist!');
       }
       return true;
     }),
 
-  check('employeeId')
-    .notEmpty()
-    .withMessage('Employee ID cannot be empty!')
-    .isInt()
-    .withMessage('Employee ID must be an integer!'),
-
   check('userId')
     .notEmpty()
     .withMessage('User ID cannot be empty!')
     .isInt()
-    .withMessage('User ID must be an integer!'),
+    .withMessage('User ID must be an integer!')
+    .custom(async (value) => {
+      const user = await prisma.user.findUnique({ where: { id: value } });
+      if (!user) {
+        throw new Error('User does not exist!');
+      }
+      return true;
+    }),
 
   (req, res, next) => {
     const errors = validationResult(req);
@@ -69,7 +72,9 @@ const updateRequestLeaveValidator = [
     .isInt()
     .withMessage('RequestLeave ID must be an integer!')
     .custom(async (value) => {
-      const result = await prisma.requestLeave.findUnique({ where: { id: parseInt(value) } });
+      const result = await prisma.requestLeave.findUnique({
+        where: { id: parseInt(value) },
+      });
       if (!result) {
         throw new Error('RequestLeave does not exist!');
       }
@@ -101,12 +106,28 @@ const updateRequestLeaveValidator = [
   check('employeeId')
     .optional()
     .isInt()
-    .withMessage('Employee ID must be an integer!'),
+    .withMessage('Employee ID must be an integer!')
+    .custom(async (value) => {
+      const employee = await prisma.employee.findUnique({
+        where: { id: value },
+      });
+      if (!employee) {
+        throw new Error('Employee does not exist!');
+      }
+      return true;
+    }),
 
   check('userId')
     .optional()
     .isInt()
-    .withMessage('User ID must be an integer!'),
+    .withMessage('User ID must be an integer!')
+    .custom(async (value) => {
+      const user = await prisma.user.findUnique({ where: { id: value } });
+      if (!user) {
+        throw new Error('User does not exist!');
+      }
+      return true;
+    }),
 
   (req, res, next) => {
     const errors = validationResult(req);
@@ -127,7 +148,9 @@ const deleteRequestLeaveValidator = [
     .isInt()
     .withMessage('RequestLeave ID must be an integer!')
     .custom(async (value) => {
-      const result = await prisma.requestLeave.findUnique({ where: { id: parseInt(value) } });
+      const result = await prisma.requestLeave.findUnique({
+        where: { id: parseInt(value) },
+      });
       if (!result) {
         throw new Error('RequestLeave does not exist!');
       }
@@ -145,4 +168,8 @@ const deleteRequestLeaveValidator = [
   },
 ];
 
-export { addRequestLeaveValidator, updateRequestLeaveValidator, deleteRequestLeaveValidator };
+export {
+  addRequestLeaveValidator,
+  updateRequestLeaveValidator,
+  deleteRequestLeaveValidator,
+};

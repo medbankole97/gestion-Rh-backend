@@ -1,4 +1,3 @@
-// validators/TimeTrackingValidator.js
 import { check, param, validationResult } from 'express-validator';
 import { StatusCodes } from 'http-status-codes';
 import prisma from '../config/prisma.js';
@@ -16,18 +15,10 @@ const addTimeTrackingValidator = [
     .optional()
     .isISO8601()
     .toDate()
-    .withMessage('Checkout time must be a valid date!'),
-
-  check('employeeId')
-    .notEmpty()
-    .withMessage('Employee ID cannot be empty!')
-    .bail()
-    .isInt()
-    .withMessage('Employee ID must be an integer!')
-    .custom(async (value) => {
-      const employee = await prisma.employee.findUnique({ where: { id: value } });
-      if (!employee) {
-        throw new Error('Employee does not exist!');
+    .withMessage('Checkout time must be a valid date!')
+    .custom((value, { req }) => {
+      if (value && new Date(value) <= new Date(req.body.checkin_time)) {
+        throw new Error('Checkout time must be after check-in time!');
       }
       return true;
     }),
@@ -58,7 +49,9 @@ const updateTimeTrackingValidator = [
     .isInt()
     .withMessage('TimeTracking ID must be an integer!')
     .custom(async (value) => {
-      const result = await prisma.timeTracking.findUnique({ where: { id: parseInt(value) } });
+      const result = await prisma.timeTracking.findUnique({
+        where: { id: parseInt(value) },
+      });
       if (!result) {
         throw new Error('TimeTracking does not exist!');
       }
@@ -75,17 +68,15 @@ const updateTimeTrackingValidator = [
     .optional()
     .isISO8601()
     .toDate()
-    .withMessage('Checkout time must be a valid date!'),
+    .withMessage('Checkout time must be a valid date!')
+    .custom((value, { req }) => {
+      if (value && new Date(value) <= new Date(req.body.checkin_time)) {
+        throw new Error('Checkout time must be after check-in time!');
+      }
+      return true;
+    }),
 
-  check('employeeId')
-    .optional()
-    .isInt()
-    .withMessage('Employee ID must be an integer!'),
-
-  check('userId')
-    .optional()
-    .isInt()
-    .withMessage('User ID must be an integer!'),
+  check('userId').optional().isInt().withMessage('User ID must be an integer!'),
 
   (req, res, next) => {
     const errors = validationResult(req);
@@ -107,7 +98,9 @@ const deleteTimeTrackingValidator = [
     .withMessage('TimeTracking ID must be an integer!')
     .bail()
     .custom(async (value) => {
-      const result = await prisma.timeTracking.findUnique({ where: { id: parseInt(value) } });
+      const result = await prisma.timeTracking.findUnique({
+        where: { id: parseInt(value) },
+      });
       if (!result) {
         throw new Error('TimeTracking does not exist!');
       }
@@ -125,4 +118,8 @@ const deleteTimeTrackingValidator = [
   },
 ];
 
-export { addTimeTrackingValidator, updateTimeTrackingValidator, deleteTimeTrackingValidator };
+export {
+  addTimeTrackingValidator,
+  updateTimeTrackingValidator,
+  deleteTimeTrackingValidator,
+};

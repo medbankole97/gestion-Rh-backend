@@ -1,18 +1,35 @@
 // routes/requestLeaveRoutes.js
 import express from 'express';
-import RequestLeaveController from '../controllers/RequestLeaveController.js';
-import { addRequestLeaveValidator, updateRequestLeaveValidator, deleteRequestLeaveValidator } from '../validators/RequestLeaveValidator.js';
+import RequestLeaveController from '../controllors/RequestLeaveController.js';
+import {
+  addRequestLeaveValidator,
+  updateRequestLeaveValidator,
+  deleteRequestLeaveValidator,
+} from '../validators/RequestLeaveValidator.js';
+import { authenticateToken, authorizeRole } from '../middleware/auth.js'; // Assurez-vous que le chemin est correct
 
 const router = express.Router();
 
-router.post('/', addRequestLeaveValidator, RequestLeaveController.createRequestLeave);
+router.post(
+  '',authenticateToken,
+  addRequestLeaveValidator,
+  RequestLeaveController.createRequestLeave
+);
 
-router.get('/', RequestLeaveController.getAllRequestLeaves);
+router.get('/', authenticateToken, RequestLeaveController.getAllRequestLeaves);
 
-router.get('/:id', RequestLeaveController.getRequestLeaveById);
+router.get('/:id',authenticateToken,  RequestLeaveController.getRequestLeaveById);
 
-router.put('/:id', updateRequestLeaveValidator, RequestLeaveController.updateRequestLeave);
+router.put(
+  '/:id',authenticateToken,
+  updateRequestLeaveValidator,
+  RequestLeaveController.updateRequestLeave
+);
 
-router.delete('/:id', deleteRequestLeaveValidator, RequestLeaveController.deleteRequestLeave);
+router.delete(
+  '/:id',authenticateToken,
+  deleteRequestLeaveValidator,
+  RequestLeaveController.deleteRequestLeave
+);
 
 export default router;

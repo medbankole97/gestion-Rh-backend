@@ -1,13 +1,33 @@
 import express from 'express';
-import UserController from '../controllers/UserController.js';
-import { addUserValidator, updateUserValidator, deleteUserValidator } from '../validators/UserValidator.js';
+import UserController from '../controllors/UserController.js';
+import {
+  addUserValidator,
+  updateUserValidator,
+  deleteUserValidator,
+} from '../validators/UserValidator.js';
+import { authenticateToken, authorizeRole } from '../middleware/auth.js';
 
 const router = express.Router();
 
-router.post('/', addUserValidator, UserController.createUser);
-router.get('/', UserController.getAllUsers);
-router.get('/:id', UserController.getUserById);
-router.put('/:id', updateUserValidator, UserController.updateUser);
-router.delete('/:id', deleteUserValidator, UserController.deleteUser);
+// Routes utilisateurs
+router.post('/',addUserValidator, UserController.createUser);
+router.get('/',  UserController.getAllUsers);
+router.get('/:id', 
+//  authenticateToken, 
+UserController.getUserById);
+router.put(
+  '/:id',
+  // authenticateToken,
+  // authorizeRole('ADMIN'),
+  updateUserValidator,
+  UserController.updateUser
+);
+router.delete(
+  '/:id',
+  // authenticateToken,
+  // authorizeRole('ADMIN'), 
+  deleteUserValidator,
+  UserController.deleteUser
+);
 
 export default router;

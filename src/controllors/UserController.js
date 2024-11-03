@@ -1,89 +1,131 @@
-// controllers/UserController.js
 import prisma from '../config/prisma.js';
+import bcrypt from 'bcryptjs';
 
-// Create a new user
+// Créer un utilisateur
 const createUser = async (req, res) => {
-  const { fullname, email, password, role, status, employeeId } = req.body;
+  const { fullname, email, password, role, status } = req.body;
+
   try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const user = await prisma.user.create({
-      data: {
-        fullname,
-        email,
-        password,
-        role,
-        status,
-        createdate: new Date(),
-        employeeId,
-      },
+      data: { fullname, email, password: hashedPassword, role, status },
     });
-    res.status(201).json({ user });
+
+    res.status(201).json({
+      message: `User ${fullname} created successfully.`,
+      user,
+    });
   } catch (error) {
-    res.status(500).json({ error: 'Error while creating the user' });
+    console.error(error);
+    res.status(500).json({ error: 'Error creating user. Please try again.' });
   }
 };
 
-// Get all users
+// Récupérer tous les utilisateurs
 const getAllUsers = async (req, res) => {
   try {
-    const users = await prisma.user.findMany();
-    res.status(200).json({ users });
-  } catch (error) {
-    res.status(500).json({ error: 'Error while fetching users' });
-  }
-};
-
-// Get a user by ID
-const getUserById = async (req, res) => {
-  const { id } = req.params;
-  try {
-    const user = await prisma.user.findUnique({
-      where: { id: parseInt(id) },
-    });
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-    res.status(200).json({ user });
-  } catch (error) {
-    res.status(500).json({ error: 'Error while fetching the user' });
-  }
-};
-
-// Update a user
-const updateUser = async (req, res) => {
-  const { id } = req.params;
-  const { fullname, email, password, role, status, employeeId } = req.body;
-  try {
-    const user = await prisma.user.update({
-      where: { id: parseInt(id) },
-      data: {
-        fullname,
-        email,
-        password,
-        role,
-        status,
-        employeeId,
+    const users = await prisma.user.findMany({
+      orderBy: {
+        id: 'asc', // Changez 'id' à tout autre champ que vous souhaitez utiliser pour le tri
       },
     });
-    res.status(200).json({ user });
+    res.status(200).json({
+      message: `${users.length} user(s) retrieved successfully.`,
+      users,
+    });
   } catch (error) {
-    res.status(500).json({ error: 'Error while updating the user' });
+    console.error(error);
+    res.status(500).json({ error: 'Error retrieving users.' });
+  }
+};
+// Récupérer un utilisateur par ID
+const getUserById = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: Number(id) },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: `User with ID ${id} not found.` });
+    }
+
+    res.status(200).json({
+      message: `User with ID ${id} retrieved successfully.`,
+      user,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error retrieving user.' });
   }
 };
 
-// Delete a user
+// Mettre à jour un utilisateur
+const updateUser = async (req, res) => {
+  const { id } = req.params;
+  const { fullname, email, password, role, status } = req.body;
+
+  const data = { fullname, email, role, status };
+
+  if (password) {
+    data.password = await bcrypt.hash(password, 10);
+  }
+
+  try {
+    const userExists = await prisma.user.findUnique({
+      where: { id: Number(id) },
+    });
+
+    if (!userExists) {
+      return res.status(404).json({ message: `User with ID ${id} not found.` });
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: Number(id) },
+      data,
+    });
+
+    res.status(200).json({
+      message: `User with ID ${id} updated successfully.`,
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error updating user.' });
+  }
+};
+
+// Supprimer un utilisateur
 const deleteUser = async (req, res) => {
   const { id } = req.params;
+
   try {
+    const userExists = await prisma.user.findUnique({
+      where: { id: parseInt(id) },
+    });
+
+    if (!userExists) {
+      return res.status(404).json({ message: `User with ID ${id} not found.` });
+    }
+
     await prisma.user.delete({
       where: { id: parseInt(id) },
     });
-    res.status(204).send();
+
+    res.status(200).json({
+      message: `User with ID ${id} deleted successfully.`,
+    });
   } catch (error) {
-    res.status(500).json({ error: 'Error while deleting the user' });
+    console.error(error);
+    if (error.code === 'P2025') {
+      return res.status(404).json({ message: `User with ID ${id} not found.` });
+    }
+    res.status(500).json({ message: 'Error deleting user.' });
   }
 };
 
-// Export all the functions as part of UserController object
 const UserController = {
   createUser,
   getAllUsers,

@@ -1,99 +1,156 @@
-// controllers/RequestLeaveController.js
 import prisma from '../config/prisma.js';
 
-// Create a new leave request
+// Créer une demande de congé
 const createRequestLeave = async (req, res) => {
-  const { start_date, end_date, motif, typeLeaveId, employeeId, userId } = req.body;
+  const { start_date, end_date, motif, status, typeLeaveId, userId } = req.body;
+
   try {
     const requestLeave = await prisma.requestLeave.create({
       data: {
         start_date: new Date(start_date),
         end_date: new Date(end_date),
         motif,
+        status,
         typeLeaveId,
-        employeeId,
         userId,
       },
     });
-    res.status(201).json({ requestLeave });
+
+    res.status(201).json({
+      message: `Request leave created successfully.`,
+      requestLeave,
+    });
   } catch (error) {
-    res.status(500).json({ error: 'Error while creating the leave request' });
+    console.error(error);
+    res
+      .status(500)
+      .json({ error: 'Error creating request leave. Please try again.' });
   }
 };
 
-// Get all leave requests
+// Récupérer toutes les demandes de congé
 const getAllRequestLeaves = async (req, res) => {
   try {
     const requestLeaves = await prisma.requestLeave.findMany({
       include: {
-        typeLeave: true, // Include type leave data
-        employee: true,  // Include employee data
-        user: true,      // Include user data
-      },
-    });
-    res.status(200).json({ requestLeaves });
-  } catch (error) {
-    res.status(500).json({ error: 'Error while fetching leave requests' });
-  }
-};
-
-// Get a leave request by ID
-const getRequestLeaveById = async (req, res) => {
-  const { id } = req.params;
-  try {
-    const requestLeave = await prisma.requestLeave.findUnique({
-      where: { id: parseInt(id) },
-      include: {
         typeLeave: true,
-        employee: true,
         user: true,
       },
     });
-    if (!requestLeave) {
-      return res.status(404).json({ error: 'Leave request not found' });
-    }
-    res.status(200).json({ requestLeave });
+    res.status(200).json({
+      message: `${requestLeaves.length} request leave(s) retrieved successfully.`,
+      requestLeaves,
+    });
   } catch (error) {
-    res.status(500).json({ error: 'Error while fetching the leave request' });
+    console.error(error);
+    res.status(500).json({ error: 'Error retrieving request leaves.' });
   }
 };
 
-// Update a leave request
-const updateRequestLeave = async (req, res) => {
+// Récupérer une demande de congé par ID
+const getRequestLeaveById = async (req, res) => {
   const { id } = req.params;
-  const { start_date, end_date, motif, typeLeaveId, employeeId, userId } = req.body;
+
   try {
-    const requestLeave = await prisma.requestLeave.update({
-      where: { id: parseInt(id) },
-      data: {
-        start_date: new Date(start_date),
-        end_date: new Date(end_date),
-        motif,
-        typeLeaveId,
-        employeeId,
-        userId,
+    const requestLeave = await prisma.requestLeave.findUnique({
+      where: { id: Number(id) },
+      include: {
+        typeLeave: true,
+        user: true,
       },
     });
-    res.status(200).json({ requestLeave });
+
+    if (!requestLeave) {
+      return res
+        .status(404)
+        .json({ message: `Request leave with ID ${id} not found.` });
+    }
+
+    res.status(200).json({
+      message: `Request leave with ID ${id} retrieved successfully.`,
+      requestLeave,
+    });
   } catch (error) {
-    res.status(500).json({ error: 'Error while updating the leave request' });
+    console.error(error);
+    res.status(500).json({ error: 'Error retrieving request leave.' });
   }
 };
 
-// Delete a leave request
+// Mettre à jour une demande de congé
+const updateRequestLeave = async (req, res) => {
+  const { id } = req.params;
+  const { start_date, end_date, motif, status, typeLeaveId, userId } = req.body;
+
+  const data = {
+    start_date: new Date(start_date),
+    end_date: new Date(end_date),
+    motif,
+    status,
+    typeLeaveId,
+
+    userId,
+  };
+
+  try {
+    const requestLeaveExists = await prisma.requestLeave.findUnique({
+      where: { id: Number(id) },
+    });
+
+    if (!requestLeaveExists) {
+      return res
+        .status(404)
+        .json({ message: `Request leave with ID ${id} not found.` });
+    }
+
+    const updatedRequestLeave = await prisma.requestLeave.update({
+      where: { id: Number(id) },
+      data,
+    });
+
+    res.status(200).json({
+      message: `Request leave with ID ${id} updated successfully.`,
+      requestLeave: updatedRequestLeave,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error updating request leave.' });
+  }
+};
+
+// Supprimer une demande de congé
 const deleteRequestLeave = async (req, res) => {
   const { id } = req.params;
+
   try {
+    const requestLeaveExists = await prisma.requestLeave.findUnique({
+      where: { id: parseInt(id) },
+    });
+
+    if (!requestLeaveExists) {
+      return res
+        .status(404)
+        .json({ message: `Request leave with ID ${id} not found.` });
+    }
+
     await prisma.requestLeave.delete({
       where: { id: parseInt(id) },
     });
-    res.status(204).send();
+
+    res.status(200).json({
+      message: `Request leave with ID ${id} deleted successfully.`,
+    });
   } catch (error) {
-    res.status(500).json({ error: 'Error while deleting the leave request' });
+    console.error(error);
+    if (error.code === 'P2025') {
+      return res
+        .status(404)
+        .json({ message: `Request leave with ID ${id} not found.` });
+    }
+    res.status(500).json({ message: 'Error deleting request leave.' });
   }
 };
 
-// Export all the functions as part of RequestLeaveController object
+// Exporter le contrôleur en tant qu'objet
 const RequestLeaveController = {
   createRequestLeave,
   getAllRequestLeaves,

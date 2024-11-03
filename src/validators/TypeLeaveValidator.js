@@ -9,17 +9,14 @@ const addTypeLeaveValidator = [
     .notEmpty()
     .withMessage('Name cannot be empty!')
     .bail()
-    .isLength({ min: 2 })
+    .isLength({ min: 5 })
     .withMessage('Name must be at least 2 characters long!'),
 
-  check('description')
-    .optional()
-    .isLength({ max: 255 })
-    .withMessage('Description must be at most 255 characters long!'),
-
-  check('status')
+  check('userId')
     .notEmpty()
-    .withMessage('Status cannot be empty!'),
+    .withMessage('User ID cannot be empty!')
+    .isInt()
+    .withMessage('User ID must be an integer!'),
 
   (req, res, next) => {
     const errors = validationResult(req);
@@ -39,7 +36,9 @@ const updateTypeLeaveValidator = [
     .withMessage('TypeLeave ID is required!')
     .bail()
     .custom(async (value) => {
-      const result = await prisma.typeLeave.findUnique({ where: { id: parseInt(value) } });
+      const result = await prisma.typeLeave.findUnique({
+        where: { id: parseInt(value) },
+      });
       if (!result) {
         throw new Error('TypeLeave does not exist!');
       }
@@ -48,18 +47,10 @@ const updateTypeLeaveValidator = [
 
   check('name')
     .optional()
-    .isLength({ min: 2 })
+    .isLength({ min: 5 })
     .withMessage('Name must be at least 2 characters long!'),
 
-  check('description')
-    .optional()
-    .isLength({ max: 255 })
-    .withMessage('Description must be at most 255 characters long!'),
-
-  check('status')
-    .optional()
-    .notEmpty()
-    .withMessage('Status cannot be empty!'),
+  check('userId').optional().isInt().withMessage('User ID must be an integer!'),
 
   (req, res, next) => {
     const errors = validationResult(req);
@@ -79,7 +70,9 @@ const deleteTypeLeaveValidator = [
     .withMessage('TypeLeave ID is required!')
     .bail()
     .custom(async (value) => {
-      const result = await prisma.typeLeave.findUnique({ where: { id: parseInt(value) } });
+      const result = await prisma.typeLeave.findUnique({
+        where: { id: parseInt(value) },
+      });
       if (!result) {
         throw new Error('TypeLeave does not exist!');
       }
@@ -97,4 +90,8 @@ const deleteTypeLeaveValidator = [
   },
 ];
 
-export { addTypeLeaveValidator, updateTypeLeaveValidator, deleteTypeLeaveValidator };
+export {
+  addTypeLeaveValidator,
+  updateTypeLeaveValidator,
+  deleteTypeLeaveValidator,
+};

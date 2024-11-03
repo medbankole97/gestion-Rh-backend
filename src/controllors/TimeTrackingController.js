@@ -1,93 +1,147 @@
-// controllers/TimeTrackingController.js
 import prisma from '../config/prisma.js';
 
-// Create a new time tracking entry
+// Créer un enregistrement de suivi du temps
 const createTimeTracking = async (req, res) => {
-  const { checkin_time, checkout_time, employeeId, userId } = req.body;
+  const { checkin_time, checkout_time, userId } = req.body;
+
   try {
     const timeTracking = await prisma.timeTracking.create({
       data: {
         checkin_time: new Date(checkin_time),
         checkout_time: checkout_time ? new Date(checkout_time) : null,
-        employeeId,
         userId,
       },
     });
-    res.status(201).json({ timeTracking });
+
+    res.status(201).json({
+      message: `Time tracking record created successfully.`,
+      timeTracking,
+    });
   } catch (error) {
-    res.status(500).json({ error: 'Error while creating the time tracking entry' });
+    console.error(error);
+    res.status(500).json({
+      error: 'Error creating time tracking record. Please try again.',
+    });
   }
 };
 
-// Get all time tracking entries
+// Récupérer tous les enregistrements de suivi du temps
 const getAllTimeTrackings = async (req, res) => {
   try {
     const timeTrackings = await prisma.timeTracking.findMany({
       include: {
-        employee: true, // Include employee data
-        user: true,     // Include user data
-      },
-    });
-    res.status(200).json({ timeTrackings });
-  } catch (error) {
-    res.status(500).json({ error: 'Error while fetching time tracking entries' });
-  }
-};
-
-// Get a time tracking entry by ID
-const getTimeTrackingById = async (req, res) => {
-  const { id } = req.params;
-  try {
-    const timeTracking = await prisma.timeTracking.findUnique({
-      where: { id: parseInt(id) },
-      include: {
-        employee: true,
         user: true,
       },
     });
-    if (!timeTracking) {
-      return res.status(404).json({ error: 'Time tracking entry not found' });
-    }
-    res.status(200).json({ timeTracking });
+    res.status(200).json({
+      message: `${timeTrackings.length} time tracking record(s) retrieved successfully.`,
+      timeTrackings,
+    });
   } catch (error) {
-    res.status(500).json({ error: 'Error while fetching the time tracking entry' });
+    console.error(error);
+    res.status(500).json({ error: 'Error retrieving time tracking records.' });
   }
 };
 
-// Update a time tracking entry
-const updateTimeTracking = async (req, res) => {
+// Récupérer un enregistrement de suivi du temps par ID
+const getTimeTrackingById = async (req, res) => {
   const { id } = req.params;
-  const { checkin_time, checkout_time, employeeId, userId } = req.body;
+
   try {
-    const timeTracking = await prisma.timeTracking.update({
-      where: { id: parseInt(id) },
-      data: {
-        checkin_time: new Date(checkin_time),
-        checkout_time: checkout_time ? new Date(checkout_time) : null,
-        employeeId,
-        userId,
+    const timeTracking = await prisma.timeTracking.findUnique({
+      where: { id: Number(id) },
+      include: {
+        user: true,
       },
     });
-    res.status(200).json({ timeTracking });
+
+    if (!timeTracking) {
+      return res
+        .status(404)
+        .json({ message: `Time tracking record with ID ${id} not found.` });
+    }
+
+    res.status(200).json({
+      message: `Time tracking record with ID ${id} retrieved successfully.`,
+      timeTracking,
+    });
   } catch (error) {
-    res.status(500).json({ error: 'Error while updating the time tracking entry' });
+    console.error(error);
+    res.status(500).json({ error: 'Error retrieving time tracking record.' });
   }
 };
 
-// Delete a time tracking entry
+// Mettre à jour un enregistrement de suivi du temps
+const updateTimeTracking = async (req, res) => {
+  const { id } = req.params;
+  const { checkin_time, checkout_time, userId } = req.body;
+
+  const data = {
+    checkin_time: new Date(checkin_time),
+    checkout_time: checkout_time ? new Date(checkout_time) : null,
+    userId,
+  };
+
+  try {
+    const timeTrackingExists = await prisma.timeTracking.findUnique({
+      where: { id: Number(id) },
+    });
+
+    if (!timeTrackingExists) {
+      return res
+        .status(404)
+        .json({ message: `Time tracking record with ID ${id} not found.` });
+    }
+
+    const updatedTimeTracking = await prisma.timeTracking.update({
+      where: { id: Number(id) },
+      data,
+    });
+
+    res.status(200).json({
+      message: `Time tracking record with ID ${id} updated successfully.`,
+      timeTracking: updatedTimeTracking,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error updating time tracking record.' });
+  }
+};
+
+// Supprimer un enregistrement de suivi du temps
 const deleteTimeTracking = async (req, res) => {
   const { id } = req.params;
+
   try {
+    const timeTrackingExists = await prisma.timeTracking.findUnique({
+      where: { id: parseInt(id) },
+    });
+
+    if (!timeTrackingExists) {
+      return res
+        .status(404)
+        .json({ message: `Time tracking record with ID ${id} not found.` });
+    }
+
     await prisma.timeTracking.delete({
       where: { id: parseInt(id) },
     });
-    res.status(204).send();
+
+    res.status(200).json({
+      message: `Time tracking record with ID ${id} deleted successfully.`,
+    });
   } catch (error) {
-    res.status(500).json({ error: 'Error while deleting the time tracking entry' });
+    console.error(error);
+    if (error.code === 'P2025') {
+      return res
+        .status(404)
+        .json({ message: `Time tracking record with ID ${id} not found.` });
+    }
+    res.status(500).json({ message: 'Error deleting time tracking record.' });
   }
 };
 
-// Export all the functions as part of TimeTrackingController object
+// Exporter le contrôleur en tant qu'objet
 const TimeTrackingController = {
   createTimeTracking,
   getAllTimeTrackings,

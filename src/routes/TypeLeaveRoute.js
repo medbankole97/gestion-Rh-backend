@@ -1,17 +1,31 @@
 import express from 'express';
-import TypeLeaveController from '../controllers/TypeLeaveController.js';
-import { addTypeLeaveValidator, updateTypeLeaveValidator, deleteTypeLeaveValidator } from '../validators/TypeLeaveValidator.js';
+import TypeLeaveController from '../controllors/TypeLeaveController.js';
+import {
+  addTypeLeaveValidator,
+  updateTypeLeaveValidator,
+  deleteTypeLeaveValidator,
+} from '../validators/TypeLeaveValidator.js';
+import { authenticateToken, authorizeRole } from '../middleware/auth.js'; // Assurez-vous que le chemin est correct
+
 
 const router = express.Router();
 
-// Create a new type of leaverouter.post('/', addTypeLeaveValidator, TypeLeaveController.createTypeLeave);
+router.post('/',authenticateToken, addTypeLeaveValidator, TypeLeaveController.createTypeLeave);
 
-router.get('/', TypeLeaveController.getAllTypeLeaves);
+router.get('/',authenticateToken, TypeLeaveController.getAllTypeLeaves);
 
-router.get('/:id', TypeLeaveController.getTypeLeaveById);
+router.get('/:id',authenticateToken, TypeLeaveController.getTypeLeaveById);
 
-router.put('/:id', updateTypeLeaveValidator, TypeLeaveController.updateTypeLeave);
+router.put(
+  '/:id',authenticateToken,
+  updateTypeLeaveValidator,
+  TypeLeaveController.updateTypeLeave
+);
 
-router.delete('/:id', deleteTypeLeaveValidator, TypeLeaveController.deleteTypeLeave);
+router.delete(
+  '/:id',authenticateToken,
+  deleteTypeLeaveValidator,
+  TypeLeaveController.deleteTypeLeave
+);
 
 export default router;

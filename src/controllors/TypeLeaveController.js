@@ -1,84 +1,143 @@
-// controllers/TypeLeaveController.js
 import prisma from '../config/prisma.js';
 
-// Create a new type of leave
+// Créer un type de congé
 const createTypeLeave = async (req, res) => {
-  const { name, description, status, userId } = req.body;
+  const { name, userId } = req.body;
+
   try {
     const typeLeave = await prisma.typeLeave.create({
       data: {
         name,
-        description,
-        status,
         userId,
       },
     });
-    res.status(201).json({ typeLeave });
+
+    res.status(201).json({
+      message: `Type leave ${name} created successfully.`,
+      typeLeave,
+    });
   } catch (error) {
-    res.status(500).json({ error: 'Error while creating the type of leave' });
+    console.error(error);
+    res
+      .status(500)
+      .json({ error: 'Error creating type leave. Please try again.' });
   }
 };
 
-// Get all types of leave
+// Récupérer tous les types de congé
 const getAllTypeLeaves = async (req, res) => {
   try {
-    const typeLeaves = await prisma.typeLeave.findMany();
-    res.status(200).json({ typeLeaves });
+    const typeLeaves = await prisma.typeLeave.findMany({
+      include: {
+        user: true,
+      },
+    });
+    res.status(200).json({
+      message: `${typeLeaves.length} type leave(s) retrieved successfully.`,
+      typeLeaves,
+    });
   } catch (error) {
-    res.status(500).json({ error: 'Error while fetching types of leave' });
+    console.error(error);
+    res.status(500).json({ error: 'Error retrieving type leaves.' });
   }
 };
 
-// Get a type of leave by ID
+// Récupérer un type de congé par ID
 const getTypeLeaveById = async (req, res) => {
   const { id } = req.params;
+
   try {
     const typeLeave = await prisma.typeLeave.findUnique({
-      where: { id: parseInt(id) },
+      where: { id: Number(id) },
+      include: {
+        user: true,
+      },
     });
+
     if (!typeLeave) {
-      return res.status(404).json({ error: 'Type of leave not found' });
+      return res
+        .status(404)
+        .json({ message: `Type leave with ID ${id} not found.` });
     }
-    res.status(200).json({ typeLeave });
+
+    res.status(200).json({
+      message: `Type leave with ID ${id} retrieved successfully.`,
+      typeLeave,
+    });
   } catch (error) {
-    res.status(500).json({ error: 'Error while fetching the type of leave' });
+    console.error(error);
+    res.status(500).json({ error: 'Error retrieving type leave.' });
   }
 };
 
-// Update a type of leave
+// Mettre à jour un type de congé
 const updateTypeLeave = async (req, res) => {
   const { id } = req.params;
-  const { name, description, status, userId } = req.body;
+  const { name, userId } = req.body;
+
   try {
-    const typeLeave = await prisma.typeLeave.update({
-      where: { id: parseInt(id) },
+    const typeLeaveExists = await prisma.typeLeave.findUnique({
+      where: { id: Number(id) },
+    });
+
+    if (!typeLeaveExists) {
+      return res
+        .status(404)
+        .json({ message: `Type leave with ID ${id} not found.` });
+    }
+
+    const updatedTypeLeave = await prisma.typeLeave.update({
+      where: { id: Number(id) },
       data: {
         name,
-        description,
-        status,
         userId,
       },
     });
-    res.status(200).json({ typeLeave });
+
+    res.status(200).json({
+      message: `Type leave with ID ${id} updated successfully.`,
+      typeLeave: updatedTypeLeave,
+    });
   } catch (error) {
-    res.status(500).json({ error: 'Error while updating the type of leave' });
+    console.error(error);
+    res.status(500).json({ error: 'Error updating type leave.' });
   }
 };
 
-// Delete a type of leave
+// Supprimer un type de congé
 const deleteTypeLeave = async (req, res) => {
   const { id } = req.params;
+
   try {
+    const typeLeaveExists = await prisma.typeLeave.findUnique({
+      where: { id: parseInt(id) },
+    });
+
+    if (!typeLeaveExists) {
+      return res
+        .status(404)
+        .json({ message: `Type leave with ID ${id} not found.` });
+    }
+
     await prisma.typeLeave.delete({
       where: { id: parseInt(id) },
     });
-    res.status(204).send();
+
+    res.status(200).json({
+      message: `Type leave with ID ${id} deleted successfully.`,
+    });
   } catch (error) {
-    res.status(500).json({ error: 'Error while deleting the type of leave' });
+    console.error(error);
+    if (error.code === 'P2025') {
+      return res
+        .status(404)
+        .json({ message: `Type leave with ID ${id} not found.` });
+    }
+    res.status(500).json({ message: 'Error deleting type leave.' });
   }
 };
 
-// Export all the functions as part of TypeLeaveController object
+// Exporter le contrôleur en tant qu'objet
 const TypeLeaveController = {
   createTypeLeave,
   getAllTypeLeaves,

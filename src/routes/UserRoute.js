@@ -29,5 +29,7 @@ router.delete(
   deleteUserValidator,
   UserController.deleteUser
 );
+router.post('/request-password-reset', UserController.requestPasswordReset);
+router.post('/reset-password', UserController.handleResetPassword);
 
 export default router;

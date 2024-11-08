@@ -1,5 +1,8 @@
 -- CreateEnum
-CREATE TYPE "UserRole" AS ENUM ('ADMIN', 'EMPLOYE');
+CREATE TYPE "UserRole" AS ENUM ('ADMIN', 'EMPLOYE', 'MANAGER');
+
+-- CreateEnum
+CREATE TYPE "RequestStatus" AS ENUM ('APPROUVE', 'REJETE', 'EN_ATTENTE');
 
 -- CreateTable
 CREATE TABLE "users" (
@@ -38,7 +41,7 @@ CREATE TABLE "requestleaves" (
     "start_date" TIMESTAMP(3) NOT NULL,
     "end_date" TIMESTAMP(3) NOT NULL,
     "motif" TEXT NOT NULL,
-    "status" VARCHAR(50) NOT NULL,
+    "status" "RequestStatus" NOT NULL,
     "typeLeaveId" INTEGER NOT NULL,
     "userId" INTEGER NOT NULL,
 

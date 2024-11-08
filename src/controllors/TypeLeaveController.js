@@ -5,6 +5,16 @@ const createTypeLeave = async (req, res) => {
   const { name, userId } = req.body;
 
   try {
+    // Vérifie si l'utilisateur existe
+    const userExists = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!userExists) {
+      return res.status(404).json({ message: `User with ID ${userId} not found.` });
+    }
+
+    // Crée le type de congé après validation de l'utilisateur
     const typeLeave = await prisma.typeLeave.create({
       data: {
         name,
@@ -18,9 +28,7 @@ const createTypeLeave = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res
-      .status(500)
-      .json({ error: 'Error creating type leave. Please try again.' });
+    res.status(500).json({ error: 'Error creating type leave. Please try again.' });
   }
 };
 
@@ -76,16 +84,27 @@ const updateTypeLeave = async (req, res) => {
   const { name, userId } = req.body;
 
   try {
+    // Vérifie d'abord l'existence du type de congé
     const typeLeaveExists = await prisma.typeLeave.findUnique({
       where: { id: Number(id) },
     });
 
     if (!typeLeaveExists) {
-      return res
-        .status(404)
-        .json({ message: `Type leave with ID ${id} not found.` });
+      return res.status(404).json({ message: `Type leave with ID ${id} not found.` });
     }
 
+    // Vérifie l'existence de l'utilisateur
+    if (userId) {
+      const userExists = await prisma.user.findUnique({
+        where: { id: userId },
+      });
+
+      if (!userExists) {
+        return res.status(404).json({ message: `User with ID ${userId} not found.` });
+      }
+    }
+
+    // Met à jour le type de congé
     const updatedTypeLeave = await prisma.typeLeave.update({
       where: { id: Number(id) },
       data: {

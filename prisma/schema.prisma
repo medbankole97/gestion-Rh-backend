@@ -24,6 +24,7 @@ model User {
 enum UserRole {
   ADMIN
   EMPLOYE
+  MANAGER
 }
 
 
@@ -47,12 +48,18 @@ model TimeTracking {
   @@map("timetrackings")
 }
 
+enum RequestStatus {
+  APPROUVE
+  REJETE
+  EN_ATTENTE
+}
+
 model RequestLeave {
   id             Int            @id @default(autoincrement())
   start_date     DateTime
   end_date       DateTime
   motif          String         @db.Text
-  status         String         @db.VarChar(50)
+  status         RequestStatus       
   typeLeaveId    Int
   userId         Int
   typeLeave      TypeLeave      @relation(fields: [typeLeaveId], references: [id])
@@ -60,3 +67,4 @@ model RequestLeave {
 
   @@map("requestleaves")
 }
+

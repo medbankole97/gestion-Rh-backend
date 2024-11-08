@@ -1,5 +1,7 @@
 import prisma from '../config/prisma.js';
 import bcrypt from 'bcryptjs';
+import { resetPassword, sendPasswordResetEmail } from '../services/UserService.js';
+
 
 // Créer un utilisateur
 const createUser = async (req, res) => {
@@ -125,6 +127,25 @@ const deleteUser = async (req, res) => {
     res.status(500).json({ message: 'Error deleting user.' });
   }
 };
+const  requestPasswordReset = async(req, res) => {
+  const { email } = req.body;
+  try {
+    const response = await sendPasswordResetEmail(email);
+    res.status(200).json(response);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+}
+
+const handleResetPassword = async(req, res) =>{
+  const { token, newPassword } = req.body;
+  try {
+    const response = await resetPassword(token, newPassword);
+    res.status(200).json(response);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+}
 
 const UserController = {
   createUser,
@@ -132,6 +153,9 @@ const UserController = {
   getUserById,
   updateUser,
   deleteUser,
+  handleResetPassword,
+  requestPasswordReset
+
 };
 
 export default UserController;

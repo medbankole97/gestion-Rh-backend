@@ -7,23 +7,29 @@ import {
 } from '../validators/TypeLeaveValidator.js';
 import { authenticateToken, authorizeRole } from '../middleware/auth.js'; // Assurez-vous que le chemin est correct
 
-
 const router = express.Router();
 
-router.post('/',authenticateToken, addTypeLeaveValidator, TypeLeaveController.createTypeLeave);
+router.post(
+  '/',
+  authenticateToken,
+  addTypeLeaveValidator,
+  TypeLeaveController.createTypeLeave
+);
 
-router.get('/',authenticateToken, TypeLeaveController.getAllTypeLeaves);
+router.get('/', authenticateToken, TypeLeaveController.getAllTypeLeaves);
 
-router.get('/:id',authenticateToken, TypeLeaveController.getTypeLeaveById);
+router.get('/:id', authenticateToken, TypeLeaveController.getTypeLeaveById);
 
 router.put(
-  '/:id',authenticateToken,
+  '/:id',
+  authenticateToken,
   updateTypeLeaveValidator,
   TypeLeaveController.updateTypeLeave
 );
 
 router.delete(
-  '/:id',authenticateToken,
+  '/:id',
+  authenticateToken,
   deleteTypeLeaveValidator,
   TypeLeaveController.deleteTypeLeave
 );

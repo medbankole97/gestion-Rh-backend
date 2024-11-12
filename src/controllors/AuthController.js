@@ -7,7 +7,7 @@ const generateAccessToken = (user) => {
   return jwt.sign(
     { userId: user.id, role: user.role, status: user.status },
     process.env.JWT_SECRET,
-    { expiresIn: '1h' }
+    { expiresIn: '24h' }
   );
 };
 
@@ -22,7 +22,7 @@ const generateRefreshToken = (user) => {
 const register = async (req, res) => {
   try {
     const { fullname, email, password, role } = req.body;
-    const validRoles = ['ADMIN', 'EMPLOYE'];
+    const validRoles = ['ADMIN', 'EMPLOYE', 'MANAGER'];
 
     // Vérification du rôle
     if (!validRoles.includes(role)) {
@@ -32,7 +32,7 @@ const register = async (req, res) => {
     // Vérification de l'existence de l'utilisateur
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
-      return res.status(400).json({ message: 'L\'utilisateur existe déjà.' });
+      return res.status(400).json({ message: "L'utilisateur existe déjà." });
     }
 
     // Hachage du mot de passe
@@ -53,10 +53,9 @@ const register = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ message: 'Échec de l\'enregistrement.', error });
+    res.status(500).json({ message: "Échec de l'enregistrement.", error });
   }
 };
-
 
 const login = async (req, res) => {
   try {
@@ -70,7 +69,9 @@ const login = async (req, res) => {
     const user = await prisma.user.findUnique({ where: { email } });
 
     if (!user || !user.status) {
-      return res.status(400).json({ message: 'Identifiants invalides ou compte inactif' });
+      return res
+        .status(400)
+        .json({ message: 'Identifiants invalides ou compte inactif' });
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -92,7 +93,6 @@ const login = async (req, res) => {
   }
 };
 
-
 // Renouvellement de l'accessToken
 const refreshAccessToken = async (req, res) => {
   const { refreshToken } = req.body;
@@ -111,7 +111,9 @@ const refreshAccessToken = async (req, res) => {
     });
 
     if (!user) {
-      return res.status(403).json({ message: 'Utilisateur non trouvé ou inactif.' });
+      return res
+        .status(403)
+        .json({ message: 'Utilisateur non trouvé ou inactif.' });
     }
 
     // Générer un nouveau token d'accès

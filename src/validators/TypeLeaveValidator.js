@@ -1,4 +1,3 @@
-// validators/TypeLeaveValidator.js
 import { check, param, validationResult } from 'express-validator';
 import { StatusCodes } from 'http-status-codes';
 import prisma from '../config/prisma.js';
@@ -10,13 +9,9 @@ const addTypeLeaveValidator = [
     .withMessage('Name cannot be empty!')
     .bail()
     .isLength({ min: 5 })
-    .withMessage('Name must be at least 2 characters long!'),
+    .withMessage('Name must be at least 5 characters long!'),
 
-  check('userId')
-    .notEmpty()
-    .withMessage('User ID cannot be empty!')
-    .isInt()
-    .withMessage('User ID must be an integer!'),
+  // La validation de userId est maintenant supprimée, car elle est gérée via le token d'authentification dans le contrôleur.
 
   (req, res, next) => {
     const errors = validationResult(req);
@@ -48,9 +43,9 @@ const updateTypeLeaveValidator = [
   check('name')
     .optional()
     .isLength({ min: 5 })
-    .withMessage('Name must be at least 2 characters long!'),
+    .withMessage('Name must be at least 5 characters long!'),
 
-  check('userId').optional().isInt().withMessage('User ID must be an integer!'),
+  // La validation de userId est maintenant supprimée.
 
   (req, res, next) => {
     const errors = validationResult(req);
@@ -68,6 +63,8 @@ const deleteTypeLeaveValidator = [
   param('id')
     .notEmpty()
     .withMessage('TypeLeave ID is required!')
+    .isInt()
+    .withMessage('TypeLeave ID must be an integer!')
     .bail()
     .custom(async (value) => {
       const result = await prisma.typeLeave.findUnique({

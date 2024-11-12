@@ -1,3 +1,4 @@
+// middlewares/authMiddleware.js
 import jwt from 'jsonwebtoken';
 
 const authenticateToken = (req, res, next) => {
@@ -18,8 +19,12 @@ const authenticateToken = (req, res, next) => {
   }
 
   try {
+    // Décoder le token pour extraire les informations de l'utilisateur
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
+    req.user = {
+      userId: decoded.userId,
+      role: decoded.role,
+    };
     next();
   } catch (error) {
     console.error('Token verification failed:', error);
@@ -27,6 +32,7 @@ const authenticateToken = (req, res, next) => {
   }
 };
 
+// Middleware pour autoriser les rôles spécifiques
 const authorizeRole = (...roles) => {
   return (req, res, next) => {
     if (!req.user || !roles.includes(req.user.role)) {

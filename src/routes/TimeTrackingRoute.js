@@ -11,23 +11,30 @@ import { authenticateToken, authorizeRole } from '../middleware/auth.js'; // Ass
 const router = express.Router();
 
 router.post(
-  '/',authenticateToken,
+  '/',
+  authenticateToken,
   addTimeTrackingValidator,
   TimeTrackingController.createTimeTracking
 );
 
-router.get('/',authenticateToken, TimeTrackingController.getAllTimeTrackings);
+router.get('/', authenticateToken, TimeTrackingController.getAllTimeTrackings);
 
-router.get('/:id',authenticateToken, TimeTrackingController.getTimeTrackingById);
+router.get(
+  '/:id',
+  authenticateToken,
+  TimeTrackingController.getTimeTrackingById
+);
 
 router.put(
-  '/:id', authenticateToken,
+  '/:id',
+  authenticateToken,
   updateTimeTrackingValidator,
   TimeTrackingController.updateTimeTracking
 );
 
 router.delete(
-  '/:id', authenticateToken,
+  '/:id',
+  authenticateToken,
   deleteTimeTrackingValidator,
   TimeTrackingController.deleteTimeTracking
 );

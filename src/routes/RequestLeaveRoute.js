@@ -11,23 +11,30 @@ import { authenticateToken, authorizeRole } from '../middleware/auth.js'; // Ass
 const router = express.Router();
 
 router.post(
-  '',authenticateToken,
+  '',
+  authenticateToken,
   addRequestLeaveValidator,
   RequestLeaveController.createRequestLeave
 );
 
 router.get('/', authenticateToken, RequestLeaveController.getAllRequestLeaves);
 
-router.get('/:id',authenticateToken,  RequestLeaveController.getRequestLeaveById);
+router.get(
+  '/:id',
+  authenticateToken,
+  RequestLeaveController.getRequestLeaveById
+);
 
 router.put(
-  '/:id',authenticateToken,
+  '/:id',
+  authenticateToken,
   updateRequestLeaveValidator,
   RequestLeaveController.updateRequestLeave
 );
 
 router.delete(
-  '/:id',authenticateToken,
+  '/:id',
+  authenticateToken,
   deleteRequestLeaveValidator,
   RequestLeaveController.deleteRequestLeave
 );

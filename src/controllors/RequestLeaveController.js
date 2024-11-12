@@ -2,7 +2,7 @@ import prisma from '../config/prisma.js';
 
 // Créer une demande de congé
 const createRequestLeave = async (req, res) => {
-  const { start_date, end_date, motif, status, typeLeaveId, userId } = req.body;
+  const { start_date, end_date, motif, status, typeLeaveId } = req.body;
 
   try {
     const requestLeave = await prisma.requestLeave.create({
@@ -12,7 +12,7 @@ const createRequestLeave = async (req, res) => {
         motif,
         status,
         typeLeaveId,
-        userId,
+        userId: req.user.userId, // Utilisation de l'ID utilisateur du token
       },
     });
 
@@ -32,6 +32,9 @@ const createRequestLeave = async (req, res) => {
 const getAllRequestLeaves = async (req, res) => {
   try {
     const requestLeaves = await prisma.requestLeave.findMany({
+      orderBy: {
+        id: 'asc',
+      },
       include: {
         typeLeave: true,
         user: true,
@@ -79,7 +82,7 @@ const getRequestLeaveById = async (req, res) => {
 // Mettre à jour une demande de congé
 const updateRequestLeave = async (req, res) => {
   const { id } = req.params;
-  const { start_date, end_date, motif, status, typeLeaveId, userId } = req.body;
+  const { start_date, end_date, motif, status, typeLeaveId } = req.body;
 
   const data = {
     start_date: new Date(start_date),
@@ -87,8 +90,7 @@ const updateRequestLeave = async (req, res) => {
     motif,
     status,
     typeLeaveId,
-
-    userId,
+    userId: req.user.userId, // Utilisation de l'ID utilisateur du token
   };
 
   try {

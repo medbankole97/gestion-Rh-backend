@@ -3,15 +3,13 @@ import jwt from 'jsonwebtoken';
 
 import transporter from '../config/transporter.js';
 import { config } from 'dotenv';
-import bcrypt from 'bcrypt'
-config()
+import bcrypt from 'bcrypt';
+config();
 const prisma = new PrismaClient();
 
-
-const JWT_SECRET =  process.env.JWT_SECRET
-const EMAIL_USER =  process.env.EMAIL_USER
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET 
-
+const JWT_SECRET = process.env.JWT_SECRET;
+const EMAIL_USER = process.env.EMAIL_USER;
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
 
 export async function getAdminEmails() {
   const admins = await prisma.user.findMany({
@@ -19,7 +17,7 @@ export async function getAdminEmails() {
     select: { email: true },
   });
 
-  return admins.map(admin => admin.email);
+  return admins.map((admin) => admin.email);
 }
 
 export async function sendPasswordResetEmail(email) {
@@ -49,8 +47,6 @@ export async function sendPasswordResetEmail(email) {
       'List-Unsubscribe': '<mailto:unsubscribe@votredomaine.com>',
     },
   };
-  
-  
 
   await transporter.sendMail(mailOptions);
   return { message: 'Email de réinitialisation envoyé.' };

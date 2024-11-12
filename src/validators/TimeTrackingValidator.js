@@ -23,11 +23,7 @@ const addTimeTrackingValidator = [
       return true;
     }),
 
-  check('userId')
-    .notEmpty()
-    .withMessage('User ID cannot be empty!')
-    .isInt()
-    .withMessage('User ID must be an integer!'),
+  // La validation de userId est maintenant supprimée, car elle est gérée via le token d'authentification dans le contrôleur.
 
   (req, res, next) => {
     const errors = validationResult(req);
@@ -76,7 +72,7 @@ const updateTimeTrackingValidator = [
       return true;
     }),
 
-  check('userId').optional().isInt().withMessage('User ID must be an integer!'),
+  // La validation de userId est maintenant supprimée.
 
   (req, res, next) => {
     const errors = validationResult(req);

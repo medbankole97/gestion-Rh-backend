@@ -2,7 +2,7 @@
 CREATE TYPE "UserRole" AS ENUM ('ADMIN', 'EMPLOYE', 'MANAGER');
 
 -- CreateEnum
-CREATE TYPE "RequestStatus" AS ENUM ('APPROUVE', 'REJETE', 'EN_ATTENTE');
+CREATE TYPE "RequestStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED');
 
 -- CreateTable
 CREATE TABLE "users" (

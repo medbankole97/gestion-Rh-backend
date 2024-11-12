@@ -1,7 +1,9 @@
 import prisma from '../config/prisma.js';
 import bcrypt from 'bcryptjs';
-import { resetPassword, sendPasswordResetEmail } from '../services/UserService.js';
-
+import {
+  resetPassword,
+  sendPasswordResetEmail,
+} from '../services/UserService.js';
 
 // Créer un utilisateur
 const createUser = async (req, res) => {
@@ -24,12 +26,12 @@ const createUser = async (req, res) => {
   }
 };
 
-// Récupérer tous les utilisateurs
+// Récupérer tous les utilisateurs (ADMIN uniquement)
 const getAllUsers = async (req, res) => {
   try {
     const users = await prisma.user.findMany({
       orderBy: {
-        id: 'asc', // Changez 'id' à tout autre champ que vous souhaitez utiliser pour le tri
+        id: 'asc',
       },
     });
     res.status(200).json({
@@ -41,6 +43,7 @@ const getAllUsers = async (req, res) => {
     res.status(500).json({ error: 'Error retrieving users.' });
   }
 };
+
 // Récupérer un utilisateur par ID
 const getUserById = async (req, res) => {
   const { id } = req.params;
@@ -127,7 +130,9 @@ const deleteUser = async (req, res) => {
     res.status(500).json({ message: 'Error deleting user.' });
   }
 };
-const  requestPasswordReset = async(req, res) => {
+
+// Envoyer un email de réinitialisation de mot de passe
+const requestPasswordReset = async (req, res) => {
   const { email } = req.body;
   try {
     const response = await sendPasswordResetEmail(email);
@@ -135,9 +140,10 @@ const  requestPasswordReset = async(req, res) => {
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
-}
+};
 
-const handleResetPassword = async(req, res) =>{
+// Réinitialiser le mot de passe avec un token de réinitialisation
+const handleResetPassword = async (req, res) => {
   const { token, newPassword } = req.body;
   try {
     const response = await resetPassword(token, newPassword);
@@ -145,7 +151,7 @@ const handleResetPassword = async(req, res) =>{
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
-}
+};
 
 const UserController = {
   createUser,
@@ -154,8 +160,7 @@ const UserController = {
   updateUser,
   deleteUser,
   handleResetPassword,
-  requestPasswordReset
-
+  requestPasswordReset,
 };
 
 export default UserController;

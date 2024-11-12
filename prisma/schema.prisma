@@ -49,9 +49,9 @@ model TimeTracking {
 }
 
 enum RequestStatus {
-  APPROUVE
-  REJETE
-  EN_ATTENTE
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 model RequestLeave {

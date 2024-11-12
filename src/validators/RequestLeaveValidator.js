@@ -40,18 +40,7 @@ const addRequestLeaveValidator = [
       return true;
     }),
 
-  check('userId')
-    .notEmpty()
-    .withMessage('User ID cannot be empty!')
-    .isInt()
-    .withMessage('User ID must be an integer!')
-    .custom(async (value) => {
-      const user = await prisma.user.findUnique({ where: { id: value } });
-      if (!user) {
-        throw new Error('User does not exist!');
-      }
-      return true;
-    }),
+  // La validation de userId est maintenant supprimée, car elle n'est pas nécessaire.
 
   (req, res, next) => {
     const errors = validationResult(req);
@@ -117,17 +106,7 @@ const updateRequestLeaveValidator = [
       return true;
     }),
 
-  check('userId')
-    .optional()
-    .isInt()
-    .withMessage('User ID must be an integer!')
-    .custom(async (value) => {
-      const user = await prisma.user.findUnique({ where: { id: value } });
-      if (!user) {
-        throw new Error('User does not exist!');
-      }
-      return true;
-    }),
+  // La validation de userId est maintenant supprimée.
 
   (req, res, next) => {
     const errors = validationResult(req);

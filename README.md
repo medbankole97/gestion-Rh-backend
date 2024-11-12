@@ -23,7 +23,7 @@ git clone https://github.com/medbankole97/gestion-Rh-backend.git
 ### 2. Accédez au répertoire du projet :
 
 ```bash
-cd gestion-RH-FrontEnd
+cd gestion-Rh-backend
 ```
 
 ### 3. Installez les dépendances :
@@ -49,13 +49,15 @@ PORT = 5000
 ```bash
  npm start
 ```
-- Importer la collection (`Gestion-Recette-Categorie.json`) dans postman pour effectuer des tests;
-
+- Importer la collection les collections dans postman pour effectuer des tests:
+ - `RequestLeaves.postman_collection.json`
+ - `Login.postman_collection.json`
+- ` TypeLeaves.postman_collection.json`
+ - `TimeTrackings.postman_collection.json`
 
 
 ## Endpoints API
 
-### Endpoints Recettes
 
 **Récupérer toutes les utilisateurs**
 
@@ -105,7 +107,7 @@ PORT = 5000
 
 - URL : http://localhost:5000/users/3
 - Méthode : GET
-- Réponse: Détails d'une recette;
+- Réponse: 
 
 ```bash
 [
@@ -143,7 +145,7 @@ PORT = 5000
 
  **Supprimer un utilisateur**
 
-- URL :http://localhost:5000/users/2
+- URL :http://localhost:5000/users/14
 - Méthode : DELETE
 - Réponse: 
   ```bash

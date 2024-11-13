@@ -10,22 +10,22 @@ import { authenticateToken, authorizeRole } from '../middleware/auth.js';
 const router = express.Router();
 
 // Routes utilisateurs
-router.post('/', authenticateToken,addUserValidator, UserController.createUser);
-router.get('/', authenticateToken,UserController.getAllUsers);
+router.post('/', authenticateToken,  authorizeRole('ADMIN'), addUserValidator, UserController.createUser);
+router.get('/', authenticateToken, authorizeRole('ADMIN'), UserController.getAllUsers);
 router.get('/:id', 
  authenticateToken, 
 UserController.getUserById);
 router.put(
   '/:id',
   authenticateToken,
-  // authorizeRole('ADMIN'),
+  authorizeRole('ADMIN'),
   updateUserValidator,
   UserController.updateUser
 );
 router.delete(
   '/:id',
   authenticateToken,
-  // authorizeRole('ADMIN'), 
+  authorizeRole('ADMIN'), 
   deleteUserValidator,
   UserController.deleteUser
 );

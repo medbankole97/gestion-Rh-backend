@@ -16,7 +16,7 @@ router.post(
   TypeLeaveController.createTypeLeave
 );
 
-router.get('/', authenticateToken, TypeLeaveController.getAllTypeLeaves);
+router.get('/', authenticateToken,TypeLeaveController.getAllTypeLeaves);
 
 router.get('/:id', authenticateToken, TypeLeaveController.getTypeLeaveById);
 

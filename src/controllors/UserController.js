@@ -1,5 +1,7 @@
 import prisma from '../config/prisma.js';
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+
 import {
   resetPassword,
   sendPasswordResetEmail,
@@ -102,6 +104,51 @@ const updateUser = async (req, res) => {
   }
 };
 
+
+// Mettre à jour un profil
+const updateUserProfile = async (req, res) => {
+  // const { id } = req.params;
+  const { fullname, email, password } = req.body;
+  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+ 
+  const  userId= decoded.userId
+  console.log("555555555555",userId)
+  
+  // const data = { fullname, email, password };
+
+  // if (password) {
+  //   data.password = await bcrypt.hash(password, 10);
+  // }
+
+  // try {
+    
+  //   const userExists = await prisma.user.findUnique({
+  //     where: { id: Number(userId) },
+  //   });
+  //   console.log("55555555gggh",userId)
+  //   if (!userExists) {
+  //     return res.status(404).json({ message: `User with ID ${userId} not found.` });
+  //   }
+
+  //   const updatedUser = await prisma.user.update({
+  //     where: { id: Number(userId) },
+  //     data,
+  //   });
+
+  //   res.status(200).json({
+  //     message: `User with ID ${userId} updated successfully.`,
+  //     user: updatedUser,
+  //   });
+  // } catch (error) {
+  //   console.error(error);
+  //   res.status(500).json({ error: 'Error updating user.' });
+  // }
+};
+
+
+
+
+
 // Supprimer un utilisateur
 const deleteUser = async (req, res) => {
   const { id } = req.params;
@@ -161,6 +208,7 @@ const UserController = {
   deleteUser,
   handleResetPassword,
   requestPasswordReset,
+  updateUserProfile,
 };
 
 export default UserController;

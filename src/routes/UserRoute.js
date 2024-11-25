@@ -11,9 +11,9 @@ const router = express.Router();
 
 // Routes utilisateurs
 router.post('/', authenticateToken,  authorizeRole('ADMIN'), addUserValidator, UserController.createUser);
-router.get('/', authenticateToken, authorizeRole('ADMIN'), UserController.getAllUsers);
+router.get('/', authenticateToken, authorizeRole('ADMIN', 'MANAGER', 'EMPLOYE'), UserController.getAllUsers);
 router.get('/:id', 
- authenticateToken, 
+ authenticateToken, authorizeRole('ADMIN', 'MANAGER'),
 UserController.getUserById);
 router.put(
   '/:id',
@@ -31,7 +31,14 @@ router.delete(
 );
 router.post('/request-password-reset', UserController.requestPasswordReset);
 router.post('/reset-password', UserController.handleResetPassword);
+router.put(
+  '/me',
+  authenticateToken,
+
+  UserController.updateUserProfile
+);
 // router.post('/me', authenticateToken);
+
 
 // router.get("/me", authenticateToken, async (req, res) => {
 //   try {

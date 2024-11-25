@@ -56,10 +56,8 @@ const register = async (req, res) => {
     res.status(500).json({ message: "Échec de l'enregistrement.", error });
   }
 };
-
 const login = async (req, res) => {
   try {
-    // console.log('Request body:', req.body);
     const { email, password } = req.body;
 
     if (!email || !password) {
@@ -86,6 +84,13 @@ const login = async (req, res) => {
       message: 'Connexion réussie.',
       accessToken,
       refreshToken,
+      user: {
+        id: user.id,
+        fullname: user.fullname,
+        email: user.email,
+        role: user.role,
+        status: user.status,
+      },
     });
   } catch (error) {
     console.error('Error during login:', error);

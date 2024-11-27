@@ -80,20 +80,52 @@ const getRequestLeaveById = async (req, res) => {
 };
 
 // Mettre à jour une demande de congé
-const updateRequestLeave = async (req, res) => {
-  const { id } = req.params;
-  const { start_date, end_date, motif, status, typeLeaveId } = req.body;
+// const updateRequestLeave = async (req, res) => {
+//   const { id } = req.params;
+//   const { start_date, end_date, motif, status, typeLeaveId } = req.body;
 
-  const data = {
-    start_date: new Date(start_date),
-    end_date: new Date(end_date),
-    motif,
-    status,
-    typeLeaveId,
-    userId: req.user.userId, // Utilisation de l'ID utilisateur du token
-  };
+//   const data = {
+//     start_date: new Date(start_date),
+//     end_date: new Date(end_date),
+//     motif,
+//     status,
+//     typeLeaveId,
+//     userId: req.user.userId, 
+//   };
+
+//   try {
+//     const requestLeaveExists = await prisma.requestLeave.findUnique({
+//       where: { id: Number(id) },
+//     });
+
+//     if (!requestLeaveExists) {
+//       return res
+//         .status(404)
+//         .json({ message: `Request leave with ID ${id} not found.` });
+//     }
+
+//     const updatedRequestLeave = await prisma.requestLeave.update({
+//       where: { id: Number(id) },
+//       data,
+//     });
+
+//     res.status(200).json({
+//       message: `Request leave with ID ${id} updated successfully.`,
+//       requestLeave: updatedRequestLeave,
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: 'Error updating request leave.' });
+//   }
+// };
+
+// Mettre à jour uniquement le statut d'une demande de congé
+const updateRequestLeave = async (req, res) => {
+  const { id } = req.params; // ID de la demande de congé
+  const { status } = req.body; // Nouveau statut fourni dans le corps de la requête
 
   try {
+    // Vérifier si la demande existe
     const requestLeaveExists = await prisma.requestLeave.findUnique({
       where: { id: Number(id) },
     });
@@ -104,9 +136,10 @@ const updateRequestLeave = async (req, res) => {
         .json({ message: `Request leave with ID ${id} not found.` });
     }
 
+    // Mettre à jour uniquement le champ 'status'
     const updatedRequestLeave = await prisma.requestLeave.update({
       where: { id: Number(id) },
-      data,
+      data: { status }, // Mise à jour du statut uniquement
     });
 
     res.status(200).json({
@@ -118,6 +151,8 @@ const updateRequestLeave = async (req, res) => {
     res.status(500).json({ error: 'Error updating request leave.' });
   }
 };
+
+
 
 // Supprimer une demande de congé
 const deleteRequestLeave = async (req, res) => {

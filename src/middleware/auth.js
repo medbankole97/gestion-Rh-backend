@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 
 const authenticateToken = (req, res, next) => {
   const authHeader = req.header('Authorization');
+  console.log('Authorization Header:', authHeader); // Vérifiez le header Authorization
 
   if (!authHeader) {
     return res
@@ -11,6 +12,7 @@ const authenticateToken = (req, res, next) => {
   }
 
   const token = authHeader.split(' ')[1];
+  console.log('Token:', token); // Vérifiez le token extrait
 
   if (!token) {
     return res
@@ -19,18 +21,21 @@ const authenticateToken = (req, res, next) => {
   }
 
   try {
-    // Décoder le token pour extraire les informations de l'utilisateur
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log('Decoded Token:', decoded); // Loguez le contenu du token décrypté
+
     req.user = {
       userId: decoded.userId,
       role: decoded.role,
     };
+    console.log('Request User:', req.user); // Vérifiez si req.user est défini
     next();
   } catch (error) {
     console.error('Token verification failed:', error);
     res.status(401).json({ message: 'Invalid token.' });
   }
 };
+
 
 // Middleware pour autoriser les rôles spécifiques
 const authorizeRole = (...roles) => {

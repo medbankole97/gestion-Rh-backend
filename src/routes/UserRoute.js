@@ -31,12 +31,9 @@ router.delete(
 );
 router.post('/request-password-reset', UserController.requestPasswordReset);
 router.post('/reset-password', UserController.handleResetPassword);
-router.put(
-  '/me',
-  authenticateToken,
+router.put('/profile',  UserController.updateCurentUser);
+router.put('/change-password', UserController.changePassword);
 
-  UserController.updateUserProfile
-);
 // router.post('/me', authenticateToken);
 
 

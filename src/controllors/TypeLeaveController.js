@@ -122,20 +122,66 @@ const updateTypeLeave = async (req, res) => {
 };
 
 // Supprimer un type de congé
+// const deleteTypeLeave = async (req, res) => {
+//   const { id } = req.params;
+
+//   try {
+//     const typeLeaveExists = await prisma.typeLeave.findUnique({
+//       where: { id: parseInt(id) },
+//     });
+
+//     if (!typeLeaveExists) {
+//       return res
+//         .status(404)
+//         .json({ message: `Type leave with ID ${id} not found.` });
+//     }
+
+//     await prisma.typeLeave.delete({
+//       where: { id: parseInt(id) },
+//     });
+
+//     res.status(200).json({
+//       message: `Type leave with ID ${id} deleted successfully.`,
+//     });
+//   } catch (error) {
+//     console.error(error);
+//     if (error.code === 'P2025') {
+//       return res
+//         .status(404)
+//         .json({ message: `Type leave with ID ${id} not found.` });
+//     }
+//     res.status(500).json({ message: 'Error deleting type leave.' });
+//   }
+// };
+
+
 const deleteTypeLeave = async (req, res) => {
   const { id } = req.params;
 
   try {
+    // Vérifier si le type de congé existe
     const typeLeaveExists = await prisma.typeLeave.findUnique({
       where: { id: parseInt(id) },
     });
 
     if (!typeLeaveExists) {
-      return res
-        .status(404)
-        .json({ message: `Type leave with ID ${id} not found.` });
+      return res.status(404).json({
+        message: `Type leave with ID ${id} not found.`,
+      });
     }
 
+    // Vérifier si le type de congé est utilisé dans des demandes de congé
+    const requestsUsingTypeLeave = await prisma.requestLeave.count({
+      where: { typeLeaveId: parseInt(id) },
+    });
+
+    if (requestsUsingTypeLeave > 0) {
+      return res.status(400).json({
+        message: `Cannot delete type leave with ID ${id} because it is used in existing leave requests.`,
+      });
+    }
+
+    // Si aucune demande n'utilise ce type de congé, procéder à la suppression
     await prisma.typeLeave.delete({
       where: { id: parseInt(id) },
     });
@@ -146,13 +192,16 @@ const deleteTypeLeave = async (req, res) => {
   } catch (error) {
     console.error(error);
     if (error.code === 'P2025') {
-      return res
-        .status(404)
-        .json({ message: `Type leave with ID ${id} not found.` });
+      return res.status(404).json({
+        message: `Type leave with ID ${id} not found.`,
+      });
     }
-    res.status(500).json({ message: 'Error deleting type leave.' });
+    res.status(500).json({
+      message: 'Error deleting type leave.',
+    });
   }
 };
+
 
 // Exporter le contrôleur en tant qu'objet
 const TypeLeaveController = {

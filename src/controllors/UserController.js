@@ -104,51 +104,6 @@ const updateUser = async (req, res) => {
   }
 };
 
-
-// Mettre à jour un profil
-const updateUserProfile = async (req, res) => {
-  // const { id } = req.params;
-  const { fullname, email, password } = req.body;
-  const decoded = jwt.verify(token, process.env.JWT_SECRET);
- 
-  const  userId= decoded.userId
-  console.log("555555555555",userId)
-  
-  // const data = { fullname, email, password };
-
-  // if (password) {
-  //   data.password = await bcrypt.hash(password, 10);
-  // }
-
-  // try {
-    
-  //   const userExists = await prisma.user.findUnique({
-  //     where: { id: Number(userId) },
-  //   });
-  //   console.log("55555555gggh",userId)
-  //   if (!userExists) {
-  //     return res.status(404).json({ message: `User with ID ${userId} not found.` });
-  //   }
-
-  //   const updatedUser = await prisma.user.update({
-  //     where: { id: Number(userId) },
-  //     data,
-  //   });
-
-  //   res.status(200).json({
-  //     message: `User with ID ${userId} updated successfully.`,
-  //     user: updatedUser,
-  //   });
-  // } catch (error) {
-  //   console.error(error);
-  //   res.status(500).json({ error: 'Error updating user.' });
-  // }
-};
-
-
-
-
-
 // Supprimer un utilisateur
 const deleteUser = async (req, res) => {
   const { id } = req.params;
@@ -199,6 +154,87 @@ const handleResetPassword = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+// Mettre à jour le profil utilisateur
+const updateCurentUser = async (req, res) => {
+  try {
+    const userId = parseInt(req.user.userId, 10);
+
+    console.log('Parsed userId:', userId, typeof userId);
+    if (!userId || isNaN(userId)) {
+      return res.status(400).json({ message: 'Invalid user ID.' });
+    }
+
+    console.log('User ID:', userId);
+
+    const { fullname, email } = req.body;
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: { fullname, email },
+    });
+
+    res.status(200).json({
+      message: 'User updated successfully.',
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error('Error updating user:', error);
+    res.status(500).json({
+      message: 'An error occurred while updating the user.',
+      error: error.message,
+    });
+  }
+};
+
+
+
+// Changer le mot de passe
+const changePassword = async (req, res) => {
+  try {
+    const userId = parseInt(req.user.userId, 10);
+    console.log('User ID:', userId);
+
+    const { currentPassword, newPassword } = req.body;
+    console.log('Body:', req.body);
+
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      return res.status(404).json({ message: 'Utilisateur non trouvé.' });
+    }
+
+    const isPasswordCorrect = await bcrypt.compare(currentPassword, user.password);
+    if (!isPasswordCorrect) {
+      return res.status(400).json({ message: 'Mot de passe actuel incorrect.' });
+    }
+
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: { password: hashedNewPassword },
+    });
+
+    res.status(200).json({
+      message: 'Mot de passe mis à jour avec succès.',
+      user: {
+        id: updatedUser.id,
+        fullname: updatedUser.fullname,
+        email: updatedUser.email,
+      },
+    });
+  } catch (error) {
+    console.error('Change Password Error:', error.message);
+    res.status(500).json({ message: 'Erreur lors du changement de mot de passe.' });
+  }
+};
+
 
 const UserController = {
   createUser,
@@ -208,7 +244,9 @@ const UserController = {
   deleteUser,
   handleResetPassword,
   requestPasswordReset,
-  updateUserProfile,
+  updateCurentUser,
+  changePassword,
+
 };
 
 export default UserController;

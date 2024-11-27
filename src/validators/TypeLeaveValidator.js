@@ -9,7 +9,18 @@ const addTypeLeaveValidator = [
     .withMessage('Name cannot be empty!')
     .bail()
     .isLength({ min: 5 })
-    .withMessage('Name must be at least 5 characters long!'),
+    .withMessage('Name must be at least 5 characters long!')
+    .bail()
+    .custom(async (value) => {
+      // Vérifier si un type de congé avec ce nom existe déjà
+      const existingTypeLeave = await prisma.typeLeave.findUnique({
+        where: { name: value },
+      });
+      if (existingTypeLeave) {
+        throw new Error('This leave type already exists!');
+      }
+      return true;
+    }),
 
   // La validation de userId est maintenant supprimée, car elle est gérée via le token d'authentification dans le contrôleur.
 

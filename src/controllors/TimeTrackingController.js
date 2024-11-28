@@ -23,10 +23,32 @@ const createTimeTracking = async (req, res) => {
       return res.status(400).json({ error: 'Check-in time is required.' });
     }
 
+    // Obtenir les limites de la journée actuelle
+    const now = new Date();
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+    const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+
+    // Convertir les dates saisies
+    const checkin = new Date(checkin_time);
+    const checkout = checkout_time ? new Date(checkout_time) : null;
+
+    // Vérification des plages horaires
+    if (checkin < startOfDay || checkin > endOfDay) {
+      return res.status(400).json({
+        error: 'Check-in time must be within today\'s date.',
+      });
+    }
+    if (checkout && (checkout < startOfDay || checkout > endOfDay)) {
+      return res.status(400).json({
+        error: 'Check-out time must be within today\'s date.',
+      });
+    }
+
+    // Création du pointage
     const timeTracking = await prisma.timeTracking.create({
       data: {
-        checkin_time: new Date(checkin_time),
-        checkout_time: checkout_time ? new Date(checkout_time) : null,
+        checkin_time: checkin,
+        checkout_time: checkout,
         userId: req.user.userId, // Utilisation de l'ID utilisateur du token
       },
     });
@@ -52,6 +74,7 @@ const createTimeTracking = async (req, res) => {
     });
   }
 };
+
 
 // Récupérer tous les enregistrements de suivi du temps
 const getAllTimeTrackings = async (req, res) => {

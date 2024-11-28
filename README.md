@@ -49,110 +49,14 @@ PORT = 5000
 ```bash
  npm start
 ```
-- Importer la collection les collections dans postman pour effectuer des tests:
- - `RequestLeaves.postman_collection.json`
- - `Login.postman_collection.json`
-- ` TypeLeaves.postman_collection.json`
- - `TimeTrackings.postman_collection.json`
-
 
 ## Endpoints API
 
+- Importer la collection qui se trouve dans postman pour effectuer des tests:
+ - `Gestion RH.postman_collection.json`
+ 
 
-**Récupérer toutes les utilisateurs**
 
-- URL : http://localhost:5000/users
-- Méthode : GET
-- Réponse: 
-
-```bash
-[
-   {
-            "id": 1,
-            "fullname": "Mohamed Bankole",
-            "email": "medbankole97@gmail.com",
-            "password": "$2b$10$TuanqEzfpXSDe2VkZUxxOeucgkFxDlz20OVLnJXdXL3uAaZIj5SPm",
-            "role": "ADMIN",
-            "status": true
-        },
-        {
-            "id": 2,
-            "fullname": "Coumba Ahmed Diop",
-            "email": "coumbadiop@gmail.com",
-            "password": "$2b$10$PAyUWprLGAKEAmZlXGqCIuM4B4hpnWIRbxj4GVtrNJc78vtXMVMuy",
-            "role": "EMPLOYE",
-            "status": true
-        },
-]
-```
-
-**Créer une nouveau utilisateur**
-
-- URL : http://localhost:5000/users
-- Méthode : POST
-
-```bash
- [
-    {
-   "fullname": "Yacoub Bankolé",
-   "email": "yacoub98@gmail.com",
-   "password": "pass123",
-   "role": "ADMIN"
-    
-  }
- ]
-```
-
-**Récupérer un utilisateur**
-
-- URL : http://localhost:5000/users/3
-- Méthode : GET
-- Réponse: 
-
-```bash
-[
-  
-    {
-        "id": 3,
-        "fullname": "Abdou Bankole",
-        "email": "bankoleabdou00@gmail.com",
-        "password": "$2b$10$nsKGLpIGNCToOKc.0w1zROmasLUDdxRM6dcg88X7J6T9NbhiN5NJe",
-        "role": "MANAGER",
-        "status": true
-    }
-  
-]
-```
-
-**Mettre à jour une  information d'un utilisateur**
-
-- URL : http://localhost:5000/users/2
-- Méthode : PUT
-
-```bash
-{
-    "message": "User with ID 2 updated successfully.",
-    "user": {
-        "id": 2,
-        "fullname": "Coumba sidi Diop",
-        "email": "sidicoumba98@gmail.com",
-        "password": "$2a$10$LwkAv1z0GBMOW5SZ0M0/TOR95C2Lc.pALdchalia7npAvsAVGxpgO",
-        "role": "EMPLOYE",
-        "status": true
-    }
- }
-```
-
- **Supprimer un utilisateur**
-
-- URL :http://localhost:5000/users/14
-- Méthode : DELETE
-- Réponse: 
-  ```bash
-  {
-    "message": "User with ID 14 deleted successfully."
-  }
-```
 
 ### Tests unitaires
 

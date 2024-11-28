@@ -4,15 +4,16 @@ import prisma from '../config/prisma.js';
 // Règles de validation pour l'ajout d'un utilisateur
 export const addUserValidator = [
   body('fullname')
-  .isString()
+  .trim() // Supprime les espaces en début et fin de chaîne
   .notEmpty()
-  .withMessage('Full name is required.')
+  .withMessage('Full name is required and cannot contain only spaces.')
   .bail()
-  .isLength({ min: 3 })
-  .withMessage('Full name must be at least 3 characters long.')
+  .isLength({ min: 5, max: 100 })
+  .withMessage('Full name must be between 5 and 100 characters long.')
   .matches(/^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/)
-  .withMessage('Full name must contain only letters, spaces, hyphens, or apostrophes.'),
-
+  .withMessage(
+    'Full name must contain only letters, spaces, hyphens, or apostrophes.'
+  ),
 
   body('email')
   .isEmail()
@@ -50,13 +51,19 @@ export const addUserValidator = [
 export const updateUserValidator = [
   // Validation pour le fullname
   body('fullname')
-    .optional()
-    .isString()
-    .isLength({ min: 3 })
-    .withMessage('Full name must be at least 3 characters long.')
-    .matches(/^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/)
-    .withMessage('Full name must contain only letters, spaces, hyphens, or apostrophes.'),
-  // Validation pour l'email
+  .optional() // Rendre le champ optionnel
+  .trim() // Supprime les espaces au début et à la fin
+  .notEmpty()
+  .withMessage('Full name cannot contain only spaces.')
+  .bail()
+  .isString()
+  .withMessage('Full name must be a string.')
+  .isLength({ min: 5, max: 100 })
+  .withMessage('Full name must be between 5 and 100 characters long.')
+  .matches(/^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/)
+  .withMessage(
+    'Full name must contain only letters, spaces, hyphens, or apostrophes.'
+  ),
   body('email')
     .optional()
     .isEmail()

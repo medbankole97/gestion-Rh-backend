@@ -56,32 +56,44 @@ const register = async (req, res) => {
     res.status(500).json({ message: "Échec de l'enregistrement.", error });
   }
 };
+
+
+
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    // Check if email and password are provided
     if (!email || !password) {
-      return res.status(400).json({ message: 'Email et mot de passe requis.' });
+      return res.status(400).json({ message: 'Email and password are required.' });
     }
 
+    // Find user by email
     const user = await prisma.user.findUnique({ where: { email } });
 
-    if (!user || !user.status) {
-      return res
-        .status(400)
-        .json({ message: 'Identifiants invalides ou compte inactif' });
+    // If the email does not exist
+    if (!user) {
+      return res.status(404).json({ message: 'This account does not exist.' });
     }
 
+    // If the account is inactive
+    if (!user.status) {
+      return res.status(403).json({ message: 'This account is inactive.' });
+    }
+
+    // Validate password
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      return res.status(400).json({ message: 'Identifiants invalides.' });
+      return res.status(400).json({ message: 'Incorrect password.' });
     }
 
+    // Generate access and refresh tokens
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
 
+    // Send login success response
     res.json({
-      message: 'Connexion réussie.',
+      message: 'Login successful.',
       accessToken,
       refreshToken,
       user: {
@@ -94,9 +106,10 @@ const login = async (req, res) => {
     });
   } catch (error) {
     console.error('Error during login:', error);
-    res.status(500).json({ message: 'Échec de la connexion.', error });
+    res.status(500).json({ message: 'Login failed.', error });
   }
 };
+
 
 // Renouvellement de l'accessToken
 const refreshAccessToken = async (req, res) => {

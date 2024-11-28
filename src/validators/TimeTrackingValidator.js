@@ -11,17 +11,17 @@ const addTimeTrackingValidator = [
     .toDate()
     .withMessage('Check-in time must be a valid date!'),
 
-  check('checkout_time')
-    .optional()
-    .isISO8601()
-    .toDate()
-    .withMessage('Checkout time must be a valid date!')
-    .custom((value, { req }) => {
-      if (value && new Date(value) <= new Date(req.body.checkin_time)) {
-        throw new Error('Checkout time must be after check-in time!');
-      }
-      return true;
-    }),
+  // check('checkout_time')
+  //   .optional()
+  //   .isISO8601()
+  //   .toDate()
+  //   .withMessage('Checkout time must be a valid date!')
+  //   .custom((value, { req }) => {
+  //     if (value && new Date(value) <= new Date(req.body.checkin_time)) {
+  //       throw new Error('Checkout time must be after check-in time!');
+  //     }
+  //     return true;
+  //   }),
 
   // La validation de userId est maintenant supprimée, car elle est gérée via le token d'authentification dans le contrôleur.
 

@@ -8,7 +8,10 @@ const addTypeLeaveValidator = [
     .notEmpty()
     .withMessage('Name cannot be empty!')
     .bail()
-    .isLength({ min: 5 })
+    .trim() // Supprime les espaces en début et fin de chaîne
+    .notEmpty()
+    .withMessage('name is required and cannot contain only spaces.')
+    .isLength({ min: 5, max: 100 })
     .withMessage('Name must be at least 5 characters long!')
     .bail()
     .custom(async (value) => {
@@ -40,6 +43,8 @@ const updateTypeLeaveValidator = [
   param('id')
     .notEmpty()
     .withMessage('TypeLeave ID is required!')
+    .isInt()
+    .withMessage('TypeLeave ID must be an integer!')
     .bail()
     .custom(async (value) => {
       const result = await prisma.typeLeave.findUnique({
@@ -52,11 +57,25 @@ const updateTypeLeaveValidator = [
     }),
 
   check('name')
-    .optional()
-    .isLength({ min: 5 })
-    .withMessage('Name must be at least 5 characters long!'),
-
-  // La validation de userId est maintenant supprimée.
+    .optional() // Name est optionnel
+    .trim()
+    .notEmpty()
+    .withMessage('Name cannot contain only spaces.')
+    .isLength({ min: 5, max: 100 })
+    .withMessage('Name must be between 5 and 100 characters long!')
+    .bail()
+    .custom(async (value, { req }) => {
+      const existingTypeLeave = await prisma.typeLeave.findFirst({
+        where: {
+          name: value,
+          NOT: { id: parseInt(req.params.id) }, // Exclure le type de congé en cours de modification
+        },
+      });
+      if (existingTypeLeave) {
+        throw new Error('This leave type already exists!');
+      }
+      return true;
+    }),
 
   (req, res, next) => {
     const errors = validationResult(req);
@@ -68,6 +87,7 @@ const updateTypeLeaveValidator = [
     next();
   },
 ];
+
 
 // Validator for deleting a type of leave
 const deleteTypeLeaveValidator = [

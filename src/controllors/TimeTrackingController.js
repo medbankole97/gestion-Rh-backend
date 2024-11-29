@@ -150,12 +150,11 @@ const updateTimeTracking = async (req, res) => {
   const { id } = req.params;
   const { checkin_time, checkout_time } = req.body;
 
-  const data = {
-    checkin_time: new Date(checkin_time),
-    checkout_time: checkout_time ? new Date(checkout_time) : null,
-    userId: req.user.userId, // Utilisation de l'ID utilisateur du token
-  };
+  // Récupération de l'utilisateur connecté (via le token)
+  const userId = req.user.userId;
+  const userRole = req.user.role; // Récupération du rôle (vous devez avoir ce rôle dans le token)
 
+  // Validation que l'utilisateur ne tente de modifier que ses propres données
   try {
     const timeTrackingExists = await prisma.timeTracking.findUnique({
       where: { id: Number(id) },
@@ -166,6 +165,20 @@ const updateTimeTracking = async (req, res) => {
         .status(404)
         .json({ message: `Time tracking record with ID ${id} not found.` });
     }
+
+    // Si l'utilisateur est un EMPLOYE, il ne peut modifier que son propre enregistrement
+    if (userRole === 'EMPLOYE' && timeTrackingExists.userId !== userId) {
+      return res.status(403).json({
+        message: 'You can only update your own time tracking records.',
+      });
+    }
+
+    // Si tout est validé, procéder à la mise à jour de l'enregistrement
+    const data = {
+      checkin_time: new Date(checkin_time),
+      checkout_time: checkout_time ? new Date(checkout_time) : null,
+      userId: timeTrackingExists.userId, // Assurez-vous que l'ID de l'utilisateur reste le même
+    };
 
     const updatedTimeTracking = await prisma.timeTracking.update({
       where: { id: Number(id) },
@@ -191,6 +204,7 @@ const updateTimeTracking = async (req, res) => {
     res.status(500).json({ error: 'Error updating time tracking record.' });
   }
 };
+
 
 // Supprimer un enregistrement de suivi du temps
 const deleteTimeTracking = async (req, res) => {

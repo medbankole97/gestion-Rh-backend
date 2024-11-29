@@ -21,9 +21,9 @@ const addRequestLeaveValidator = [
 
   check('motif')
     .notEmpty()
-    .withMessage('Motif cannot be empty!')
-    .isLength({ max: 255 })
-    .withMessage('Motif must not exceed 255 characters!'),
+    .withMessage('Motif cannot be empty!'),
+    // .isLength({ max: 255 })
+    // .withMessage('Motif must not exceed 255 characters!'),
 
   check('typeLeaveId')
     .notEmpty()
